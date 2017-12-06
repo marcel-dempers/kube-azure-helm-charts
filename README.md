@@ -16,7 +16,8 @@ This Helm chart automates the above use case, removing manual efforts!
 * Reads the connection string for the new storage and uses K8 api to inject it as a K8 secret
 * The pod that needs the secret will be able to mount it in!
 
-Now your microservices that require storage can mount that secret and access storage
+Now your microservices that require storage can mount that secret and access storage.
+You can bundle this helm chart with your service charts to provision storage automatically when you summon your pods
 
 ## Prerequisites
 
