@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: storage-create
+  namespace: {{ .Values.namespace }}
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: storage-create
+    spec:
+      containers:
+      - name: storage-create
+        image: azurecr/azure-cli
+        env:
+        - name: azure_service_principal_name
+          valueFrom:
+            secretKeyRef:
+              name: storage-create
+              key: azure_service_principal_name
+        - name: azure_service_principal_key
+          valueFrom:
+            secretKeyRef:
+              name: storage-create
+              key: azure_service_principal_key
+        - name: azure_storage_subscription
+          valueFrom:
+            secretKeyRef:
+              name: storage-create
+              key: azure_storage_subscription
+        - name: azure_storage_resource_group
+          valueFrom:
+            secretKeyRef:
+              name: storage-create
+              key: azure_storage_resource_group
+        - name: azure_storage_account_name
+          valueFrom:
+            secretKeyRef:
+              name: storage-create
+              key: azure_storage_account_name
+        - name: azure_storage_ad_tenant
+          valueFrom:
+            secretKeyRef:
+              name: storage-create
+              key: azure_storage_ad_tenant
+        command:
+        - "bin/bash"
+        - "-c" 
+        - "touch /tmp/run.sh && chmod +x /tmp/run.sh && echo H4sIAG1nKFoAA81VUU/bMBB+z6/wvEjdJNwM6JjUkUkDAUJIrUTYniYF1zFNSLGD7bSCwn/f2UnTNKNMe5i2vLTxfXf33Xfny9s3wSQTwYTq1KOPpeKx5mqeMR4XKhMsK+gsFvSOh/7uVnvOH0J/b2U2UtEpj2kSGy6oMKG/3zHpcqKZygqTSRH6A9QxK65lqSDDVMmyCP2P3ciMyVKYmtaBZ391QRm8fPI8zlKJcDvFEPnb8+PaoQkC6OY/9iA1mslpJhAhdeGkKRyRsgn9omiIFNsBoBoErTTqMmzEs/nrepHmxrJokX+tMEe9NjQhmOLUAC3i2HWTtnQFyKoNxLWhC95skuWVlygyVCRUJfHZZeR5x+PRKLq6PB+dhf67F8joVC4Ik0JwZgkTbUCb6V8g94Ru71Gvv04VuUy9996WyXID/V9SBgNd5Ki3tHMEYzN47qHTKOx9/sWyV1tCWyZcb34wqG7MtRt4IhB+hS+GcJXT9crZivJbXwCtXRFZoA/XbhBOz//9ENSknpBRiCSo90OANBffjk7iq/HFyQj4HQZzqgJVikBzuCpGB3k54Upww3U/k0F9iWsagZE5F6AuowZ9QZVL/1bDvTw8PBmfeksED6ZF9p0rbXfNEOH5Lt5xxwk1FA6WHqoe7NiTmj1pRbNufqUh3tmE1+iaUNU4i271+3UX16+Wh313+OfKDeeZSCyByPGpg+E7bmi3gGqHWuyqhnVb1yRam9bV1dq17bTmoXD2cUHvS7A9e1ZQbzG1OzCC3qecJlyFx1LAojTkCvBDWhSzDJoBCQPXBpgiSVjKWU4YVya7sVY7OYxuHPxZ2xntM2UaDgh/LU0qVfZIq6/NEacKjv31aGEAF1IbcpPN+Mag4NSYQg+DdsaE39ByZoaDwX4AwxPMd4NGJR2sFVuxha/UT2G65ZbGBwAA | base64 -d | gzip -d >> /tmp/run.sh && cd /tmp && ./run.sh $azure_service_principal_name $azure_service_principal_key $azure_storage_ad_tenant $azure_storage_subscription $azure_storage_resource_group $azure_storage_account_name '{{ .Values.namespace }}'"
+      restartPolicy: Never
