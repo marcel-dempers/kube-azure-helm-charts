@@ -46,6 +46,14 @@ storage-create:
   azure_storage_account_location: eastus
 ```
 
+### Configure your cluster with helm
+
+```
+kubectl create -f ./prerequisites/helm-rbac.yaml
+helm init --service-account tiller
+
+```
+
 ### Install the chart
 
 ```

@@ -15,19 +15,15 @@ az account set --subscription $azure_storage_subscription
 
 az storage account create --name $azure_storage_account_name --resource-group $azure_storage_resource_group --sku Standard_GRS
 
-CONNSTRING=$(az storage account show-connection-string --name $azure_storage_account_name --resource-group $azure_storage_resource_group | jq '.connectionString')
+azure_storage_account_key=$(az storage account keys list -n $azure_storage_account_name -g $azure_storage_resource_group | jq '.[0].value' | sed 's/\"//g')
 
-azure_storage_account_key=$(az storage account show-connection-string --name $azure_storage_account_name --resource-group $azure_storage_resource_group | jq '.connectionString' | awk '{print $4}' FS=';' | awk '{print $2}' FS='=')
+base64_name=`echo -n "$azure_storage_account_name" | base64 | tr -d '\n'`
+base64_key=`echo -n "$azure_storage_account_key" | base64 | tr -d '\n'`
 
-base64_name=`echo -n "$azure_storage_account_name" | base64`
-base64_key=`echo -n "$azure_storage_account_key" | base64 -w 0`
-
-CONFIG=$(az storage account show-connection-string --name $azure_storage_account_name --resource-group $azure_storage_resource_group | base64 | tr -d '\n')
 KUBE_TOKEN=$(</var/run/secrets/kubernetes.io/serviceaccount/token)
 
 cat > secret.json <<EOF
 {    "apiVersion": "v1",    "data": {
-       "azure-storage-secret.json": "$CONFIG",
        "azurestorageaccountname" : "$base64_name",
        "azurestorageaccountkey" : "$base64_key"
     },
@@ -39,6 +35,8 @@ cat > secret.json <<EOF
     "type": "Opaque"
 }
 EOF
+
+cat secret.json
 
 wget -S --header=Content-Type:application/json --no-check-certificate --ca-certificate /var/run/secrets/kubernetes.io/serviceaccount/ca.crt --header "Authorization: Bearer $KUBE_TOKEN" --post-file secret.json "https://kubernetes.default:443/api/v1/namespaces/$namespace/secrets"
 
